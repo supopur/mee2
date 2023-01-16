@@ -1,0 +1,4 @@
+discord
+pytoml
+flask
+quart
