@@ -3,6 +3,7 @@ from quart import render_template
 from quart.helpers import make_response
 from discord.ext import commands
 
+
 with open("config.toml", "r") as f:
     config = toml.load(f)
 
