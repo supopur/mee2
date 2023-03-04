@@ -1,0 +1,21 @@
+#The config is auto generated in the web interface do not change unless you know what you are doing.
+
+
+[webserver]
+#set to false if you dont have a certificate
+usessl = true
+port = "5000"
+#DO NOT USE IN PRODUCTION. Do not even use flask it is recomended to use a production ready wsgi server such as gunicorn
+debug = true
+#Leave it like this if you dont know what your doing.
+ip = "0.0.0.0"
+crt = "certs/certificate.crt"
+key = "certs/private.key"
+
+[bot]
+
+
+[commands]
+hello=false
+stop=false
+

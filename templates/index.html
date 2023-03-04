@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>MEE2 Index</title>
+    <link rel="icon" type="image/x-icon" href="https://cdn.discordapp.com/app-icons/1004808089834373230/e30029e50ec03472f1fe236a43d38684.png?size=512">
+    <link href="{{ url_for('static', filename='index.css') }}" rel="stylesheet" type="text/css" />
+
+</head>
+
+<body>
+    <header>
+        <h1>MEE2</h1>
+    </header>
+    <div class="container">
+        <nav>
+            <ul>
+                <li class="selected"><a href="#">Home</a></li>
+                <li><a href="/dashboard">Dashboard</a></li>
+                <li><a href="/plugins">Plugins</a></li>
+                <li><a href="/configuration">Configuration</a></li>
+                <li><a href="/logs">Logs</a></li>
+                <li><a href="/support">Support</a></li>
+            </ul>
+        </nav>
+        <main>
+            <h2>Welcome to the MEE2 index page.</h2>
+            <p>This bot is designed to help you with various tasks and make your life easier</p>
+            <p>Here you can find information about the bot's features, plugins, configuration, and support. All this info is public. If you want you can turn it off in the settings page.</p>
+        </main>
+    </div>
+</body>
+
+</html>

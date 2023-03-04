@@ -1,4 +1,4 @@
-discord
+py-cord
 pytoml
 flask
 quart

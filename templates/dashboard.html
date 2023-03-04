@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>MEE2 Dashboard</title>
+    <link href="{{ url_for('static', filename='dashboard.css') }}" rel="stylesheet" type="text/css" />
+    <link rel="icon" type="image/x-icon" href="https://cdn.discordapp.com/app-icons/1004808089834373230/e30029e50ec03472f1fe236a43d38684.png?size=512">
+</head>
+
+<body>
+    <header>
+        <h1>MEE2 - Admin Dashboard</h1>
+    </header>
+    <div class="container">
+        <nav>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="#" class="selected">Dashboard</a></li>
+                <li><a href="/plugins">Plugins</a></li>
+                <li><a href="/configuration">Configuration</a></li>
+                <li><a href="/logs">Logs</a></li>
+                <li><a href="/support">Support</a></li>
+            </ul>
+        </nav>
+        <main>
+            <p>This is the admin dashboard. Here you can see important thing like the uptime, hits per minute, cogs status etc..</p>
+            <table id="status">
+                <tr>
+                    <th>Module</th>
+                    <th>Status</th>
+                    <th>Module link</th>
+                </tr>
+                <tr>
+                    <td>Uptime</td>
+                    <td>1 Year</td>
+                    <td><a href="/api/uptime">/api/uptime</a></td>
+                </tr>
+                <tr>
+                    <td>Hits Per Minute</td>
+                    <td>10</td>
+                    <td><a href="/api/hpm">/api/hpm</a></td>
+                </tr>
+                <tr>
+                    <td>Plugin - Fivem</td>
+                    <td>Online</td>
+                    <td><a href="/plugins/fivem">/plugins/fivem</a></td>
+                </tr>
+            </table>
+        </main>
+
+    </div>
+</body>
+
+</html>
