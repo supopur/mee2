@@ -1,3 +1,0 @@
-[filter "secret"]
-    smudge = sed "s/token=.*/token=[your token]/"
-

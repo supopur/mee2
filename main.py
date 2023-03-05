@@ -7,12 +7,11 @@ from discord.ext import commands
 with open("config.toml", "r") as f:
     config = toml.load(f)
 
-with open("creds.toml", "r") as f:
-    creds = toml.load(f)
+token = os.environ.get('MEETOO_TOKEN')
 
 start_time = time.time()
 
-print(creds)
+
 intents = discord.Intents.default()
 intents.members = True
 
@@ -62,4 +61,4 @@ async def stop():
 bot.loop.create_task(app.run_task('0.0.0.0', 5000))
 
 
-bot.run(creds["token"])
+bot.run(token)
