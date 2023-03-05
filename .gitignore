@@ -1,0 +1,19 @@
+# Ignore Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore other non-needed Python files
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+
+# Ignore the meetoo async file and build directory
+meetoo.async
+build/
+
+# Ignore the cogs directory
+cogs/
+
