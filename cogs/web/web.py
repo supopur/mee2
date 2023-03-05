@@ -4,6 +4,8 @@ from discord.ext import commands
 import quart
 import toml
 import logging
+from quart import render_template
+from quart.helpers import make_response
 
 class WebServer(commands.Cog):
     def __init__(self, bot):

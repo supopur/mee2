@@ -1,6 +1,5 @@
-import discord, flask, os, quart, sys, toml, time, datetime, logging
-from quart import render_template
-from quart.helpers import make_response
+import discord, os, sys, toml, time, datetime, logging
+
 from discord.ext import commands
 
 
