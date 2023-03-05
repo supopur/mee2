@@ -3,19 +3,15 @@
 
 [webserver]
 #set to false if you dont have a certificate
-usessl = true
+usessl = false
 port = "5000"
 #DO NOT USE IN PRODUCTION. Do not even use flask it is recomended to use a production ready wsgi server such as gunicorn
-debug = true
+debug = false
 #Leave it like this if you dont know what your doing.
 ip = "0.0.0.0"
-crt = "certs/certificate.crt"
-key = "certs/private.key"
+crt = "/path/to/certificate.crt"
+key = "/path/to/private.key"
+
 
 [bot]
-
-
-[commands]
-hello=false
-stop=false
-
+cogs=["cogs.example", "cogs.web"]
