@@ -19,8 +19,9 @@ else:
     logging.basicConfig(filename='latest.log', encoding='utf-8', level=logging.INFO)
 
 logging.getLogger().addHandler(logging.StreamHandler())
-
-
+try:
+    os.remove("latest.log")
+except: pass
 def log(level, log):
     if level == "inf":
         logging.info(log)
@@ -80,34 +81,6 @@ async def stop(ctx):
         sys.exit("Terminated.")
     else:
         await ctx.respond("https://media.tenor.com/Iv6oKRuAhVEAAAAC/hal9000-im-sorry-dave.gif")
-log("inf", "Loading Quart...")
-#webserver
-app = quart.Quart(__name__)
-log("inf", "Quart loaded.")
-#The index.
-@app.route('/', methods=['GET'])
-async def index():
-    return await render_template('index.html')
-
-@app.route('/configuration', methods=['GET'])
-async def configuration():
-    return await render_template('configuration.html')
-
-@app.route('/dashboard', methods=['GET'])
-async def dashboard():
-    return await render_template('dashboard.html')
-
-@app.route('/plugins', methods=['GET'])
-async def plugins():
-    return await render_template('plugins.html')
-
-@app.route('/stop', methods=['GET'])
-async def stop():
-    sys.exit("Web terminated.")
-
-
-
-bot.loop.create_task(app.run_task('0.0.0.0', 5000))
 
 
 bot.run(token)
