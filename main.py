@@ -2,13 +2,6 @@ import discord, os, sys, toml, time, datetime, logging
 
 from discord.ext import commands
 
-
-
-
-
-
-
-
 with open("config.toml", "r") as f:
     config = toml.load(f)
 
@@ -53,6 +46,56 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 
 logging.debug("Loaded the client.")
 
+
+#Api used mainly for plugins so getting uptime, loading, unloading, reloading plugins, getting status of plugins, get plugin info, stopping the bot, getting bot name and tag, getting cpm/commands per minute, get if there is web plugin, if there is web plugin register api, get if plugin supports web and so on..
+
+class API:
+
+    #Returns config.tomls content in a array.
+    def get_config(self):
+        return self.config
+    #Dumps all the toml data from self.config and stores it inside toml.config
+    def save_config(self):
+        try:
+            with open("config.toml", w) as f:
+                self.log("inf", "Saving the configuration file...")
+                toml.dump(self.config, f)
+                self.log("inf", "Config was saved to config.toml")
+                #aok
+                return 0
+        #In case file doesnt exist
+        except Exception as e:
+            self.log("err", f"Failed to save to config.toml. {e}")
+            return 1
+    #Connect the main .log file to the api so plugins can log to latest.log w/o risking corrupting the file.
+    def log(self, status, log):
+        self.logger(str(status), str(log))
+    def load(self, extension):
+        self.logger("inf", f"Loading {extension}...")
+
+        extension = str(extension)
+
+        if extension.startswith("cogs."):
+            extension.replace("cogs.", "", 1)
+
+        try:
+            self.bot.load_extension(f"cogs.{extension}")
+        except Exception as e:
+            self.logger("wrn", f"Extension {extension} failed to load due to: {e}")
+        else:
+            self.config["bot"]["cogs"].append(f"cogs.{extension}")
+            self.save_config()
+            self.logger("inf", f"Extension {extension} loaded.")
+
+
+    def __init__(self, config, bot, log):
+        self.start_time = time.time()
+        self.config = config
+        self.bot = bot
+        self.logger = log
+
+print(type(config["bot"]))
+
 #Load all the extensions
 for x in config["bot"]["cogs"]:
     log("inf", f"Loading {x}...")
@@ -81,5 +124,7 @@ async def stop(ctx):
     else:
         await ctx.respond("https://media.tenor.com/Iv6oKRuAhVEAAAAC/hal9000-im-sorry-dave.gif")
 
+if __name__ == "__main__":
+    api = API(config, bot, log)
+    bot.run(token)
 
-bot.run(token)

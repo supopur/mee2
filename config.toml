@@ -14,4 +14,4 @@ key = "/path/to/private.key"
 
 
 [bot]
-cogs=["cogs.example", "cogs.web.web"]
+cogs=["cogs.example", "cogs.web.web", "cogs.sapi.sapi"]
