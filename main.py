@@ -6,9 +6,9 @@ with open("config.toml", "r") as f:
     config = toml.load(f)
 
 if config["webserver"]["debug"] == "true":
-    logging.basicConfig(filename='latest.log', encoding='utf-8', level=logging.DEBUG)
+    logging.basicConfig(filename='main.log', encoding='utf-8', level=logging.DEBUG)
 else:
-    logging.basicConfig(filename='latest.log', encoding='utf-8', level=logging.INFO)
+    logging.basicConfig(filename='main.log', encoding='utf-8', level=logging.INFO)
 
 logging.getLogger().addHandler(logging.StreamHandler())
 try:
@@ -70,10 +70,18 @@ class API:
     #Connect the main .log file to the api so plugins can log to latest.log w/o risking corrupting the file.
     def log(self, status, log):
         self.logger(str(status), str(log))
+
+    #Get the uptime of the root of the bot
+    def uptime(self):
+        uptime = time.time() - self.start_time
+
+        return uptime
+
+    #Loads a cog
     def load(self, extension):
+        extension = str(extension)
         self.logger("inf", f"Loading {extension}...")
 
-        extension = str(extension)
 
         if extension.startswith("cogs."):
             extension.replace("cogs.", "", 1)
@@ -83,9 +91,49 @@ class API:
         except Exception as e:
             self.logger("wrn", f"Extension {extension} failed to load due to: {e}")
         else:
+            self.logger("dbg", "Changing and saving the config for cogs.")
             self.config["bot"]["cogs"].append(f"cogs.{extension}")
-            self.save_config()
+            code = self.save_config()
+            if code == 1:
+                self.logger("Error while saving to config.toml trying again in 2s...")
+                time.sleep(2)
+                code = self.save_config()
+                if code == 1:
+                    self.logger("Error while saving to config.toml. Attempt no. 2 aborting...")
+                    return 1
             self.logger("inf", f"Extension {extension} loaded.")
+
+    #Unloads a cog
+    def unload(self, extension):
+        extension = str(extension)
+        self.logger("inf", f"Unloading {extension}...")
+
+        if extension.startswith("cogs."):
+            extension.replace("cogs.", "", 1)
+
+        try:
+            self.bot.unload_extension(f"cogs.{extension}")
+        except Exception as e:
+            if e == "ExtensionNotFound":
+                self.logger("wrn", f"{extension} could not be found are you sure it exists?")
+            elif e == "ExtensionNotLoaded":
+                self.logger("wrn", f"{extension} is not loaded skipping..")
+            else:
+                self.logger("err", f"Unknown error while unloading {extension}. Error: {e}")
+        #If nothing has gone wrong then write it to the config and save it to the file
+        else:
+            self.logger("dbg", "Changing and saving the config for cogs.")
+            self.config["bot"]["cogs"].remove(extension)
+            code = self.save_config()
+            if code == 1:
+                self.logger("Error while saving to config.toml trying again in 2s...")
+                time.sleep(2)
+                code = self.save_config()
+                if code == 1:
+                    self.logger("Error while saving to config.toml. Attempt no. 2 aborting...")
+                    return 1
+            self.logger("inf", f"Extension {extension} unloaded.")
+
 
 
     def __init__(self, config, bot, log):
@@ -126,5 +174,6 @@ async def stop(ctx):
 
 if __name__ == "__main__":
     api = API(config, bot, log)
+    bot.api = api
     bot.run(token)
 
