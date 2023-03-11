@@ -13,11 +13,19 @@ class Greetings(commands.Cog):
 
     @commands.slash_command(guild_ids=["823188238260633600"])
     async def uptime(self, ctx):
+        #Extends the 3s limit to reply so we dont get a unknown interation error.
+        ctx.defer()
+        #References the api
         api = self.bot.api
+        #Logs something using the api
         api.logger("inf", "example.py: Getting uptime...")
+
+        #Gets the seconds of how long the root of the bot is runnig
         uptime = api.uptime()
+        #Converts it into a HH:MM:SS format thats more readable. Also the .split makes sure that there are no ms
         uptime = str(datetime.timedelta(seconds=uptime)).split(".")[0]
-        await ctx.respond(f"The uptime in H:MM:SS format: {uptime}")
+        #Sends a follow up
+        await ctx.followup.send(f"The uptime in H:MM:SS format: {uptime}")
 
 def setup(bot):
     bot.add_cog(Greetings(bot))
