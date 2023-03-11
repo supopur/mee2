@@ -162,7 +162,7 @@ async def on_ready():
 
 @bot.slash_command(guild_ids=["823188238260633600"])
 async def stop(ctx):
-    ctx.defer()
+    await ctx.defer()
     if ctx.author.guild_permissions.administrator:
         print("Terminating the bot...")
         try:

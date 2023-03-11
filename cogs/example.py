@@ -14,7 +14,7 @@ class Greetings(commands.Cog):
     @commands.slash_command(guild_ids=["823188238260633600"])
     async def uptime(self, ctx):
         #Extends the 3s limit to reply so we dont get a unknown interation error.
-        ctx.defer()
+        await ctx.defer()
         #References the api
         api = self.bot.api
         #Logs something using the api
