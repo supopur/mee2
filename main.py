@@ -12,7 +12,7 @@ else:
 
 logging.getLogger().addHandler(logging.StreamHandler())
 try:
-    os.remove("latest.log")
+    os.remove("main.log")
 except: pass
 def log(level, log):
     if level == "inf":
@@ -67,7 +67,7 @@ class API:
         except Exception as e:
             self.log("err", f"Failed to save to config.toml. {e}")
             return 1
-    #Connect the main .log file to the api so plugins can log to latest.log w/o risking corrupting the file.
+    #Connect the main .log file to the api so plugins can log to latest.log w/o risking corrupting the file. Absolutly useless as you can do: self.bot.api.logger("inf", "Hello w/o some useless function")
     def log(self, status, log):
         self.logger(str(status), str(log))
 
@@ -141,7 +141,7 @@ class API:
         self.config = config
         self.bot = bot
         self.logger = log
-
+        self.guild_ids = config["bot"]["guild_ids"]
 print(type(config["bot"]))
 
 #Load all the extensions
@@ -160,7 +160,7 @@ async def on_ready():
 
 
 
-@bot.slash_command(guild_ids=["823188238260633600"])
+@bot.slash_command(guild_ids=config["bot"]["guild_ids"])
 async def stop(ctx):
     await ctx.defer()
     if ctx.author.guild_permissions.administrator:

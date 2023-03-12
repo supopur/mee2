@@ -14,4 +14,5 @@ key = "/path/to/private.key"
 
 
 [bot]
-cogs=["cogs.example", "cogs.web.web", "cogs.sapi.sapi"]
+cogs=["cogs.example", "cogs.web.web"]
+guild_ids=["823188238260633600", "1081319631463133185", "903933566612799579"]
