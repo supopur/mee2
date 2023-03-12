@@ -4,7 +4,7 @@ Mee2 is a fully customizable, open-source Discord bot with a web interface to co
 
 ## Status
 
-Mee2 is still actively maintained, but it's not yet ready for public use. Pull requests are welcome. You can find the latest version on our Gitea repo: https://git.meetoo.naze.eu
+Mee2 is still actively maintained, but it's not yet ready for public use. Pull requests are welcome. You can find the latest version on our Gitea repo: https://git.nazev.eu
 
 ## Features
 
