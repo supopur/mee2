@@ -1,4 +1,4 @@
-import discord, os, sys, toml, time, datetime, logging
+import discord, os, sys, toml, time, datetime, logging, threading, asyncio
 
 from discord.ext import commands
 
@@ -77,63 +77,6 @@ class API:
 
         return uptime
 
-    #Loads a cog
-    def load(self, extension):
-        extension = str(extension)
-        self.logger("inf", f"Loading {extension}...")
-
-
-        if extension.startswith("cogs."):
-            extension.replace("cogs.", "", 1)
-
-        try:
-            self.bot.load_extension(f"cogs.{extension}")
-        except Exception as e:
-            self.logger("wrn", f"Extension {extension} failed to load due to: {e}")
-        else:
-            self.logger("dbg", "Changing and saving the config for cogs.")
-            self.config["bot"]["cogs"].append(f"cogs.{extension}")
-            code = self.save_config()
-            if code == 1:
-                self.logger("Error while saving to config.toml trying again in 2s...")
-                time.sleep(2)
-                code = self.save_config()
-                if code == 1:
-                    self.logger("Error while saving to config.toml. Attempt no. 2 aborting...")
-                    return 1
-            self.logger("inf", f"Extension {extension} loaded.")
-
-    #Unloads a cog
-    def unload(self, extension):
-        extension = str(extension)
-        self.logger("inf", f"Unloading {extension}...")
-
-        if extension.startswith("cogs."):
-            extension.replace("cogs.", "", 1)
-
-        try:
-            self.bot.unload_extension(f"cogs.{extension}")
-        except Exception as e:
-            if e == "ExtensionNotFound":
-                self.logger("wrn", f"{extension} could not be found are you sure it exists?")
-            elif e == "ExtensionNotLoaded":
-                self.logger("wrn", f"{extension} is not loaded skipping..")
-            else:
-                self.logger("err", f"Unknown error while unloading {extension}. Error: {e}")
-        #If nothing has gone wrong then write it to the config and save it to the file
-        else:
-            self.logger("dbg", "Changing and saving the config for cogs.")
-            self.config["bot"]["cogs"].remove(extension)
-            code = self.save_config()
-            if code == 1:
-                self.logger("Error while saving to config.toml trying again in 2s...")
-                time.sleep(2)
-                code = self.save_config()
-                if code == 1:
-                    self.logger("Error while saving to config.toml. Attempt no. 2 aborting...")
-                    return 1
-            self.logger("inf", f"Extension {extension} unloaded.")
-
 
 
     def __init__(self, config, bot, log):
@@ -142,9 +85,114 @@ class API:
         self.bot = bot
         self.logger = log
         self.guild_ids = config["bot"]["guild_ids"]
-print(type(config["bot"]))
+
+#This is the most basic interface CLI wich is basically a comand line that appears when you launch the app it will have commands like stop, help, commands, cogs, load, unload and so on..
+class CLI:
+
+    def register_command(self, command, function, description):
+        self.api.logger("inf", f"Trying to register {command} into the CLI commands...")
+
+        if command in self.cli_cmds:
+            self.api.logger("wrn", f"The command {command} already exists.")
+            return 1
+
+        if not callable(function):
+            self.api.logger("err", f"Unable to register {command} as the passed function is not callable.")
+            return 1
+        try:
+            command = str(command)
+            description = str(description)
+        except:
+            self.api.logger("err", f"Passed cli name or description is not convertable to string.")
+            return 1
+
+        dictionary = {"description": description, "function": function}
+
+        try:
+            self.cli_cmds[command] = dictionary
+        except:
+            return 1
+        else:
+            self.api.logger("inf", f"CLI Command: {command} registered.")
+            return 0
+
+    def remove_command(self, command):
+        self.api.logger("inf", f"Trying to remove {command} from the CLI commands...")
+
+        if command in self.cli_cmds:
+            self.cli_cmds[command] = None
+            self.api.logger("inf", f"Command {command} removed.")
+            return 0
+        else:
+            self.api.logger("wrn", f"Command {command} could not be removed as it doesnt exist.")
+            return 1
+
+    def help(self, page=1):
+        page_size = 10
+        start_index = (page - 1) * page_size
+        end_index = start_index + page_size
+        commands = list(self.cli_cmds.keys())[start_index:end_index]
+
+        if not commands:
+            self.api.logger("wrn", "No commands found for this page.")
+            return 1
+
+        msg = f"Commands (page {page}):\n"
+        for command in commands:
+            msg += f"  {command}: {self.cli_cmds[command]['description']}\n"
+
+        self.api.logger("inf", msg)
+        return 0
+
+    def handle_input(self, user_input):
+        # Split the user input into command and arguments
+        parts = user_input.strip().split()
+        if not parts:
+            return
+        command_name = parts[0]
+        args = parts[1:]
+
+        # Find the command
+        command = self.cli_cmds.get(command_name)
+        if not command:
+            # Suggest commands based on input
+            suggestions = [cmd_name for cmd_name in self.cli_cmds
+                           if cmd_name.startswith(command_name)]
+            if suggestions:
+                self.api.logger("wrn", f"Unknown command '{command_name}'. Did you mean one of these?")
+                for suggestion in suggestions:
+                    self.api.logger("wrn", f" - {suggestion}")
+            else:
+                self.api.logger("wrn", f"Unknown command '{command_name}'")
+            return
+
+        # Execute the command
+        function = command["function"]
+        try:
+            function(*args)
+        except TypeError as e:
+            self.api.logger("wrn", f"Invalid arguments: {e}")
+
+    def run(self):
+        # Start the CLI loop
+        while True:
+            try:
+                user_input = input(self.prompt)
+            except KeyboardInterrupt:
+                # Handle CTRL+C
+                break
+            except EOFError:
+                # Handle CTRL+D
+                break
+            else:
+                self.handle_input(user_input)
 
 
+    #Init of the class where all the values inside self are defined. Takes a loaded api as a arg
+    def __init__(self, api):
+        self.api = api
+        self.cli_cmds = {}
+        self.prompt = "mee2> "
 
 
 @bot.event
@@ -168,13 +216,27 @@ async def stop(ctx):
 
 if __name__ == "__main__":
     api = API(config, bot, log)
+    cli = CLI(api)
     bot.api = api
-    bot.run(token)
     #Load all the extensions
     for x in config["bot"]["cogs"]:
         log("inf", f"Loading {x}...")
         try:
-            bot.api.load(x)
+            bot.load_extension(x)
         except Exception as e:
-            log("wrn", f"{x} Failed to load skipping... Error: {e}")
+            log("wrn", f"Extension {x} failed to load due to: {e}")
+        else:
+            log("inf", f"{x} Loaded.")
     log("inf", "Loading all cogs completed.")
+
+    # Create a thread to run the CLI
+    cli_thread = threading.Thread(target=cli.run)
+    cli_thread.start()
+
+    bot.run(token)
+
+
+
+
+
+
