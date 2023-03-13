@@ -5,24 +5,33 @@ from discord.ext import commands
 with open("config.toml", "r") as f:
     config = toml.load(f)
 
-if config["webserver"]["debug"] == "true":
-    logging.basicConfig(filename='main.log', encoding='utf-8', level=logging.DEBUG)
-else:
-    logging.basicConfig(filename='main.log', encoding='utf-8', level=logging.INFO)
-
-logging.getLogger().addHandler(logging.StreamHandler())
 try:
     os.remove("main.log")
 except: pass
+
+
+formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+handler = logging.FileHandler('main.log')
+handler.setFormatter(formatter)
+logger = logging.getLogger('')
+logger.addHandler(handler)
+logger.setLevel(logging.INFO)
+
+
+#logging.basicConfig(filename='main.log', encoding='utf-8', level=logging.DEBUG)
+
+
+#logging.getLogger().addHandler(logging.StreamHandler())
+
 def log(level, log):
     if level == "inf":
-        logging.info(log)
+        logger.info(log)
     elif level == "wrn":
-        logging.warning(log)
+        logger.warning(log)
     elif level == "dbg":
-        logging.debug(log)
+        logger.debug(log)
     elif level == "err":
-        logging.error(log)
+        logger.error(log)
 
 log("inf", "Logging utility set up.")
 
@@ -44,7 +53,7 @@ intents.members = True
 
 bot = commands.Bot(command_prefix='!', intents=intents)
 
-logging.debug("Loaded the client.")
+logger.debug("Loaded the client.")
 
 
 #Api used mainly for plugins so getting uptime, loading, unloading, reloading plugins, getting status of plugins, get plugin info, stopping the bot, getting bot name and tag, getting cpm/commands per minute, get if there is web plugin, if there is web plugin register api, get if plugin supports web and so on..
@@ -127,22 +136,7 @@ class CLI:
             self.api.logger("wrn", f"Command {command} could not be removed as it doesnt exist.")
             return 1
 
-    def help(self, page=1):
-        page_size = 10
-        start_index = (page - 1) * page_size
-        end_index = start_index + page_size
-        commands = list(self.cli_cmds.keys())[start_index:end_index]
 
-        if not commands:
-            self.api.logger("wrn", "No commands found for this page.")
-            return 1
-
-        msg = f"Commands (page {page}):\n"
-        for command in commands:
-            msg += f"  {command}: {self.cli_cmds[command]['description']}\n"
-
-        self.api.logger("inf", msg)
-        return 0
 
     def handle_input(self, user_input):
         # Split the user input into command and arguments
@@ -159,19 +153,19 @@ class CLI:
             suggestions = [cmd_name for cmd_name in self.cli_cmds
                            if cmd_name.startswith(command_name)]
             if suggestions:
-                self.api.logger("wrn", f"Unknown command '{command_name}'. Did you mean one of these?")
+                print(f"Unknown command '{command_name}'. Did you mean one of these?")
                 for suggestion in suggestions:
-                    self.api.logger("wrn", f" - {suggestion}")
+                    print(f" - {suggestion}")
             else:
-                self.api.logger("wrn", f"Unknown command '{command_name}'")
+                print(f"Unknown command '{command_name}'")
             return
 
         # Execute the command
         function = command["function"]
         try:
-            function(*args)
+            function(self, *args)
         except TypeError as e:
-            self.api.logger("wrn", f"Invalid arguments: {e}")
+            print(f"Invalid arguments: {e}")
 
     def run(self):
         # Start the CLI loop
@@ -214,10 +208,71 @@ async def stop(ctx):
     else:
         await ctx.respond("https://media.tenor.com/Iv6oKRuAhVEAAAAC/hal9000-im-sorry-dave.gif")
 
+
+
+
+
+
 if __name__ == "__main__":
     api = API(config, bot, log)
     cli = CLI(api)
     bot.api = api
+
+
+
+    #CLI commands:
+
+    #help
+    def cli_help(self, page=1):
+        page_size = 10
+        start_index = (page - 1) * page_size
+        end_index = start_index + page_size
+        commands = list(self.cli_cmds.keys())[start_index:end_index]
+
+        if not commands:
+            print("No commands found for this page.")
+            return 1
+
+        msg = f"Commands (page {page}):\n"
+        for command in commands:
+            msg += f"  {command}: {self.cli_cmds[command]['description']}\n"
+
+        print(msg)
+        return 0
+
+    cli.register_command("help", cli_help, "Shows this page.")
+
+    #uptime
+    def cli_uptime(self):
+        uptime = self.api.uptime()
+        uptime = str(datetime.timedelta(seconds=uptime)).split(".")[0]
+        print(f"The uptime of the bot is {uptime} HH:MM:SS.")
+
+    cli.register_command("uptime", cli_uptime, "Shows the uptime of the bot in seconds.")
+
+
+    #info
+    def cli_info(self):
+        print(f"You are running version 0.0.0 - Pre Release. Created by supopur under the GNUv3 license. Git repo: https://git.nazev.eu:8443/ Our discord link: https://discord.gg/dVVVSM4z")
+
+    cli.register_command("info", cli_info, "Shows the info about the bot.")
+
+    #shutdown
+    def cli_sd(self):
+        print("Shutting down the bot. You still must do CTRL+C to exit this terminal!!")
+        try:
+            sys.exit("Terminated from the cli..")
+        except: pass
+
+    cli.register_command("stop", cli_sd, "Terminates the bot.")
+
+    def cli_clear(self):
+        os.system('cls' if os.name == 'nt' else 'clear')
+
+    cli.register_command("clear", cli_clear, "Clears the terminal output")
+
+
+
     #Load all the extensions
     for x in config["bot"]["cogs"]:
         log("inf", f"Loading {x}...")
@@ -234,9 +289,6 @@ if __name__ == "__main__":
     cli_thread.start()
 
     bot.run(token)
-
-
-
 
 
 
