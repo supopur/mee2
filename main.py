@@ -144,14 +144,7 @@ class API:
         self.guild_ids = config["bot"]["guild_ids"]
 print(type(config["bot"]))
 
-#Load all the extensions
-for x in config["bot"]["cogs"]:
-    log("inf", f"Loading {x}...")
-    try:
-        bot.load_extension(x)
-    except Exception as e:
-        log("wrn", f"{x} Failed to load skipping... Error: {e}")
-log("inf", "Loading all cogs completed.")
+
 
 
 @bot.event
@@ -177,4 +170,11 @@ if __name__ == "__main__":
     api = API(config, bot, log)
     bot.api = api
     bot.run(token)
-
+    #Load all the extensions
+    for x in config["bot"]["cogs"]:
+        log("inf", f"Loading {x}...")
+        try:
+            bot.api.load(x)
+        except Exception as e:
+            log("wrn", f"{x} Failed to load skipping... Error: {e}")
+    log("inf", "Loading all cogs completed.")
