@@ -1,4 +1,4 @@
-import discord, os, sys, toml, time, datetime, logging, threading, asyncio
+import discord, os, sys, toml, time, datetime, logging, threading, asyncio, readline, importlib
 
 from discord.ext import commands
 
@@ -88,11 +88,12 @@ class API:
 
 
 
-    def __init__(self, config, bot, log):
+    def __init__(self, config, bot, log, token):
         self.start_time = time.time()
         self.config = config
         self.bot = bot
         self.logger = log
+        self.token = token
         self.guild_ids = config["bot"]["guild_ids"]
 
 #This is the most basic interface CLI wich is basically a comand line that appears when you launch the app it will have commands like stop, help, commands, cogs, load, unload and so on..
@@ -214,7 +215,7 @@ async def stop(ctx):
 
 
 if __name__ == "__main__":
-    api = API(config, bot, log)
+    api = API(config, bot, log, token)
     cli = CLI(api)
     bot.api = api
 
@@ -271,9 +272,64 @@ if __name__ == "__main__":
 
     cli.register_command("clear", cli_clear, "Clears the terminal output")
 
+    #load
+    def cli_load(self, cog):
+        try:
+            cog = str(cog)
+        except:
+            print("Unable to convert the cog name to string.")
+            return 1
+
+        print(f"Trying to load {cog}...")
+
+        try:
+            cog_module = importlib.import_module(cog)
+            class_name = cog.split(".")[1]
+            print(class_name)
+            cog_class = getattr(cog_module,class_name)
+            cog_instance = cog_class(self.api.bot)
+            self.api.bot.add_cog(cog_instance)
+        except Exception as e:
+            print(f"ERR: Failed to load {cog} becouse: {e}")
+        else:
+            print(f"Loaded {cog} successfully")
+
+    cli.register_command("load", cli_load, "Loads a cog takes a cog name as a arg example: load cogs.example")
+
+    #unload
+    def cli_unload(self, cog):
+        try:
+            cog = str(cog)
+        except:
+            print("Unable to convert the cog name to string.")
+            return 1
+        print(f"Trying to loadd {cog}...")
+
+        try:
+            cog = cog.split(".")[1]
+            self.api.bot.unload_extension(cog)
+        except Exception as e:
+            print(f"ERR Unable to unload {cog} due to: {e}")
+        else:
+            print(f"Loaded {cog} successfully")
+
+    cli.register_command("unload", cli_unload, "Unloads a cog takes a cog name as a arg example: unload cogs.example")
+
+    #start Starts the bot itself.
+    def cli_start(self):
+        print("Starting the bot...")
+        try:
+            self.api.bot.run(self.api.token)
+        except Exception as e:
+            print(e)
+            return 1
+        else:
+            print("Bot started.")
+        return 0
+
+    #cli.register_command("start", cli_start, "Starts the bot.")
 
 
-    #Load all the extensions
     for x in config["bot"]["cogs"]:
         log("inf", f"Loading {x}...")
         try:
@@ -288,7 +344,5 @@ if __name__ == "__main__":
     cli_thread = threading.Thread(target=cli.run)
     cli_thread.start()
 
+    #uncomment this to enable autostartup
     bot.run(token)
-
-
-
