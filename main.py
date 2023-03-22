@@ -48,10 +48,8 @@ log("dbg", f"Token is: {token}")
 start_time = time.time()
 
 
-intents = discord.Intents.default()
-intents.members = True
 
-bot = commands.Bot(command_prefix='!', intents=intents)
+bot = commands.Bot(command_prefix='!', intents=discord.Intents.all())
 
 logger.debug("Loaded the client.")
 
@@ -254,7 +252,7 @@ if __name__ == "__main__":
 
     #info
     def cli_info(self):
-        print(f"You are running version 0.0.0 - Pre Release. Created by supopur under the GNUv3 license. Git repo: https://git.nazev.eu:8443/ Our discord link: https://discord.gg/dVVVSM4z")
+        print(f"You are running version 0.1.0 - Dev. Created by supopur under the GNUv3 license. Git repo: https://git.nazev.eu:8443/supopur/mee2 Our discord link: https://discord.gg/dVVVSM4z")
 
     cli.register_command("info", cli_info, "Shows the info about the bot.")
 
