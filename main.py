@@ -1,4 +1,4 @@
-import discord, os, sys, toml, time, datetime, logging, threading, asyncio, readline, importlib, sqlite3
+import discord, os, sys, toml, time, datetime, logging, threading, asyncio, importlib, sqlite3
 
 from discord.ext import commands
 

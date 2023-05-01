@@ -2,4 +2,3 @@ py-cord
 pytoml
 flask
 quart
-readline
