@@ -16,3 +16,4 @@ key = "/path/to/private.key"
 [bot]
 cogs=["cogs.essentials.commands"]
 guild_ids=["823188238260633600"]
+
