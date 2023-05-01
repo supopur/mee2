@@ -85,7 +85,7 @@ class API:
 
 
 
-    def __init__(self, config, bot, log, token, dbapi):
+    def __init__(self, config, bot, log, token):
         self.start_time = time.time()
         self.config = config
         self.bot = bot
