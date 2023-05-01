@@ -129,7 +129,7 @@ class API:
     #Dumps all the toml data from self.config and stores it inside toml.config
     def save_config(self):
         try:
-            with open("config.toml", w) as f:
+            with open("config.toml", "w") as f:
                 self.log("inf", "Saving the configuration file...")
                 toml.dump(self.config, f)
                 self.log("inf", "Config was saved to config.toml")
